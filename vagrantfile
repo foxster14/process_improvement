@@ -1,0 +1,30 @@
+# -*- mode: ruby -*-
+
+# vi: set ft=ruby :
+
+
+Vagrant.configure("2") do |config|
+  
+    # This is a config loop, and we can now refer to the VM as "web"
+    config.vm.define "web" do |web|
+    
+     # This is the template   
+     web.vm.box = "ubuntu/bionic64"
+
+     # Allows us to connect to the web server on the VM at port 8080
+     web.vm.network "forwarded_port", guest: 80, host: 8080
+  
+     web.vm.network "private_network", ip: "192.168.56.10"
+  
+    end
+  
+  
+    config.vm.define "db" do |db|
+  
+     db.vm.box = "ubuntu/bionic64"
+  
+     db.vm.network "private_network", ip: "192.168.56.11"
+  
+    end 
+  
+  end
