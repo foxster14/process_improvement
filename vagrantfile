@@ -15,6 +15,18 @@ Vagrant.configure("2") do |config|
      web.vm.network "forwarded_port", guest: 80, host: 8080
   
      web.vm.network "private_network", ip: "192.168.56.10"
+
+     web.vm.provision "shell", inline: <<-SHELL
+     apt-get update
+     apt-get install -y apache2
+     apt install -y php libapache2-mod-php php-mysql
+     systemctl restart apache2.service
+     cp ../../vagrant/phptest.php /var/www/html
+     #scp -P 2222 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no phptest.php vagrant@127.0.0.1:.
+     SHELL
+     
+     #web.vm.provision "file", source: "./phptest.php", destination: "/var/www/html"
+    
   
     end
   
@@ -22,8 +34,45 @@ Vagrant.configure("2") do |config|
     config.vm.define "db" do |db|
   
      db.vm.box = "ubuntu/bionic64"
-  
+    
+     #db.vm.network "forwarded_port", guest: 80, host: 2222
      db.vm.network "private_network", ip: "192.168.56.11"
+
+     db.vm.provision "shell", inline: <<-SHELL
+     apt-get update
+     apt-get upgrade
+     apt-get install -y mariadb-server
+     mysql_secure_installation \<\<EOF
+     y
+     secret
+     secret
+     y
+     y
+     y
+     y
+     EOF
+     systemctl restart mariadb
+     mysql -e "create user 'sarah'@'localhost' identified by '123';"
+     mysql -e "grant all privileges on *.* to 'sarah'@'localhost';"
+     mysql -e "create user 'fox'@'%' identified by '123';"
+     mysql -e "grant all privileges on *.* to 'fox'@'%';"
+     mysql -e "flush privileges;"
+     git clone https://github.com/datacharmer/test_db.git
+     \c\d test_db
+     mysql -u \<yourusername\> -p -t \< employees.sql
+     cp ../../vagrant/50-server.cnf /etc/mysql/mariadb.conf.d
+     service restart mysql
+     SHELL
+
+     #db.vm.provision "shell", path: "mysql-secure-install.sh"
+
+     #db.vm.provision "shell", inline: <<-SHELL
+     #systemctl restart mariadb
+     #git clone https://github.com/datacharmer/test_db.git
+     #mysql -u foxsarh -p -t \< employees.sql
+     #SHELL
+
+
   
     end 
   
