@@ -53,6 +53,8 @@ Vagrant.configure("2") do |config|
      y
      y
      EOF
+     ## 2nd option to do mysql-secure-installation that I found from stackoverflow https://stackoverflow.com/questions/24270733/automate-mysql-secure-installation-with-echo-command-via-a-shell-script/35004940
+     #mysql -sfu root < "mysql_secure_install.sql"
      systemctl restart mariadb
      mysql -e "create user 'sarah'@'localhost' identified by '123';"
      mysql -e "grant all privileges on *.* to 'sarah'@'localhost';"
